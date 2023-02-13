@@ -27,6 +27,18 @@ if __name__ == "__main__":
     image_path = os.path.normpath(os.path.join(os.getcwd(), 'photos'))
 
     #Add new search key into array ["cat","t-shirt","apple","orange","pear","fish"]
+    
+    # Read attractions.txt and add to set
+    lines = set()
+    count = 0
+    with open("attractions.txt", "r", encoding="utf-8") as file:
+        for line in file:
+            if(count == 5):
+                break
+            line = line.strip()
+            lines.add(line)
+            count = count + 1
+            
     search_keys = list(set(["cat", "t-shirt"]))
 
     #Parameters

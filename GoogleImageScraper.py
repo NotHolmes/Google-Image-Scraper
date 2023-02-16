@@ -27,8 +27,8 @@ import patch
 class GoogleImageScraper():
     def __init__(self, webdriver_path, image_path, search_key="cat", number_of_images=1, headless=True, min_resolution=(0, 0), max_resolution=(1920, 1080), max_missed=10):
         #check parameter types
-        search_key = search_key.replace(' ', '_')
-        image_path = os.path.join(image_path, search_key)
+        search_key_path = search_key.replace(' ', '_')
+        image_path = os.path.join(image_path, search_key_path)
         if (type(number_of_images)!=int):
             print("[Error] Number of images must be integer value.")
             return
@@ -130,59 +130,58 @@ class GoogleImageScraper():
         self.driver.quit()
         print("[INFO] Google search ended")
         return image_urls
+    
+    def save_images(self,image_urls, keep_filenames, width=0, height=0):
+        print(keep_filenames)
+        #save images into file directory
+        """
+            This function takes in an array of image urls and save it into the given image path/directory.
+            Example:
+                google_image_scraper = GoogleImageScraper("webdriver_path","image_path","search_key",number_of_photos)
+                image_urls=["https://example_1.jpg","https://example_2.jpg"]
+                google_image_scraper.save_images(image_urls)
 
-def save_images(self,image_urls, keep_filenames, width=0, height=0):
-    print(keep_filenames)
-    #save images into file directory
-    """
-        This function takes in an array of image urls and save it into the given image path/directory.
-        Example:
-            google_image_scraper = GoogleImageScraper("webdriver_path","image_path","search_key",number_of_photos)
-            image_urls=["https://example_1.jpg","https://example_2.jpg"]
-            google_image_scraper.save_images(image_urls)
+        """
+        print("[INFO] Saving image, please wait...")
+        for indx,image_url in enumerate(image_urls):
+            try:
+                print("[INFO] Image url:%s"%(image_url))
+                search_string = ''.join(e for e in self.search_key if e.isalnum())
+                image = requests.get(image_url,timeout=5)
+                if image.status_code == 200:
+                    with Image.open(io.BytesIO(image.content)) as image_from_web:
+                        try:
+                            if (keep_filenames):
+                                #extact filename without extension from URL
+                                o = urlparse(image_url)
+                                image_url = o.scheme + "://" + o.netloc + o.path
+                                name = os.path.splitext(os.path.basename(image_url))[0]
+                                #join filename and extension
+                                filename = "%s.%s"%(name,image_from_web.format.lower())
+                            else:
+                                filename = "%s%s.%s"%(search_string, "_" + str(indx),image_from_web.format.lower())
 
-    """
-    print("[INFO] Saving image, please wait...")
-    for indx,image_url in enumerate(image_urls):
-        try:
-            print("[INFO] Image url:%s"%(image_url))
-            search_string = ''.join(e for e in self.search_key if e.isalnum())
-            image = requests.get(image_url,timeout=5)
-            if image.status_code == 200:
-                with Image.open(io.BytesIO(image.content)) as image_from_web:
-                    try:
-                        if (keep_filenames):
-                            #extact filename without extension from URL
-                            o = urlparse(image_url)
-                            image_url = o.scheme + "://" + o.netloc + o.path
-                            name = os.path.splitext(os.path.basename(image_url))[0]
-                            #join filename and extension
-                            filename = "%s.%s"%(name,image_from_web.format.lower())
-                        else:
-                            filename = "%s%s.%s"%(search_string, "_" + str(indx),image_from_web.format.lower())
+                            image_path = os.path.join(self.image_path, filename)
+                            print(
+                                f"[INFO] {self.search_key} \t {indx} \t Image saved at: {image_path}")
+                            
+                            # Resizing the image to given width and height
+                            if width != 0 and height != 0:
+                                image_from_web = image_from_web.resize((width, height), resample=Image.LANCZOS)
+                            else:
+                                # Resizing the image to default resolution
+                                if image_from_web.size[0] < self.min_resolution[0] or image_from_web.size[1] < self.min_resolution[1] or image_from_web.size[0] > self.max_resolution[0] or image_from_web.size[1] > self.max_resolution[1]:
+                                    continue
 
-                        image_path = os.path.join(self.image_path, filename)
-                        print(
-                            f"[INFO] {self.search_key} \t {indx} \t Image saved at: {image_path}")
-                        
-                        # Resizing the image to given width and height
-                        if width != 0 and height != 0:
-                            image_from_web = image_from_web.resize((width, height), resample=Image.LANCZOS)
-                        else:
-                            # Resizing the image to default resolution
-                            if image_from_web.size[0] < self.min_resolution[0] or image_from_web.size[1] < self.min_resolution[1] or image_from_web.size[0] > self.max_resolution[0] or image_from_web.size[1] > self.max_resolution[1]:
-                                continue
+                            image_from_web.save(image_path)
+                        except OSError:
+                            rgb_im = image_from_web.convert('RGB')
+                            rgb_im.save(image_path)
 
-                        image_from_web.save(image_path)
-                    except OSError:
-                        rgb_im = image_from_web.convert('RGB')
-                        rgb_im.save(image_path)
-
-                    image_from_web.close()
-        except Exception as e:
-            print("[ERROR] Download failed: ",e)
-            pass
-    print("--------------------------------------------------")
-    print("[INFO] Downloads completed. Please note that some photos were not downloaded as they were not in the correct format (e.g. jpg, jpeg, png)")
-    # Play a sound when the loop finishes
-    os.system("afplay /System/Library/Sounds/Glass.aiff")
+                        image_from_web.close()
+            except Exception as e:
+                print("[ERROR] Download failed: ",e)
+                pass
+        print("--------------------------------------------------")
+        print("[INFO] Downloads completed. Please note that some photos were not downloaded as they were not in the correct format (e.g. jpg, jpeg, png)")
+        os.system("afplay /System/Library/Sounds/Glass.aiff")

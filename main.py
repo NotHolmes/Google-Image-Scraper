@@ -7,16 +7,24 @@ Created on Sun Jul 12 11:02:06 2020
 """
 #Import libraries
 import os
+import time
 import concurrent.futures
 from GoogleImageScraper import GoogleImageScraper
 from patch import webdriver_executable
 
 
 def worker_thread(search_key):
+    start_time = time.time()
+
     image_scraper = GoogleImageScraper(
         webdriver_path, image_path, search_key, number_of_images, headless, min_resolution, max_resolution)
     image_urls = image_scraper.find_image_urls()
-    image_scraper.save_images(image_urls, keep_filenames)
+    image_scraper.save_images(image_urls, keep_filenames, 224, 224)
+
+    end_time = time.time()
+
+    elapsed_time = end_time - start_time
+    print(f"Elapsed time: {elapsed_time:.2f} seconds")  
 
     #Release resources
     del image_scraper
@@ -39,13 +47,14 @@ if __name__ == "__main__":
             lines.add(line)
             count = count + 1
             
-    search_keys = list(set(["cat", "t-shirt"]))
+    # search_keys = list(set(["cat", "t-shirt"]))
+    search_keys = ['The Grand Palace Bangkok']
 
     #Parameters
     number_of_images = 5                # Desired number of images
     headless = True                     # True = No Chrome GUI
     min_resolution = (0, 0)             # Minimum desired image resolution
-    max_resolution = (9999, 9999)       # Maximum desired image resolution
+    max_resolution = (1920, 1080)       # Maximum desired image resolution
     max_missed = 1000                   # Max number of failed images before exit
     number_of_workers = 1               # Number of "workers" used
     keep_filenames = False              # Keep original URL image filenames

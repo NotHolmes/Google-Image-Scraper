@@ -37,18 +37,16 @@ if __name__ == "__main__":
     #Add new search key into array ["cat","t-shirt","apple","orange","pear","fish"]
     
     # Read attractions.txt and add to set
-    lines = set()
+    lines = []
     count = 0
-    with open("attractions.txt", "r", encoding="utf-8") as file:
+    with open("../places.txt", "r", encoding="utf-8") as file:
         for line in file:
-            if(count == 5):
-                break
-            line = line.strip()
-            lines.add(line)
-            count = count + 1
+            lines.append(line.strip().lower())
             
-    # search_keys = list(set(["cat", "t-shirt"]))
-    search_keys = ['The Grand Palace Bangkok']
+    lines = lines[0:10]
+    # lines = lines[10:20]
+
+    search_keys = lines
 
     #Parameters
     number_of_images = 5                # Desired number of images

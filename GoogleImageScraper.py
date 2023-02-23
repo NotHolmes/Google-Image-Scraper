@@ -184,4 +184,3 @@ class GoogleImageScraper():
                 pass
         print("--------------------------------------------------")
         print("[INFO] Downloads completed. Please note that some photos were not downloaded as they were not in the correct format (e.g. jpg, jpeg, png)")
-        os.system("afplay /System/Library/Sounds/Glass.aiff")

@@ -11,13 +11,14 @@ import time
 import concurrent.futures
 from GoogleImageScraper import GoogleImageScraper
 from patch import webdriver_executable
+from sys import platform
 
 
 def worker_thread(search_key):
     start_time = time.time()
 
     image_scraper = GoogleImageScraper(
-        webdriver_path, image_path, search_key, number_of_images, headless, min_resolution, max_resolution)
+        webdriver_path, image_path, search_key, number_of_images, headless, min_resolution, max_resolution, max_missed)
     image_urls = image_scraper.find_image_urls()
     image_scraper.save_images(image_urls, keep_filenames, 224, 224)
 
@@ -28,6 +29,9 @@ def worker_thread(search_key):
 
     #Release resources
     del image_scraper
+
+    if(platform == 'darwin'):
+        os.system("afplay /System/Library/Sounds/Glass.aiff")
 
 if __name__ == "__main__":
     #Define file path
@@ -42,11 +46,8 @@ if __name__ == "__main__":
     with open("../places.txt", "r", encoding="utf-8") as file:
         for line in file:
             lines.append(line.strip().lower())
-            
-    lines = lines[0:10]
-    # lines = lines[10:20]
 
-    search_keys = lines
+    search_keys = lines[:10]
 
     #Parameters
     number_of_images = 5                # Desired number of images

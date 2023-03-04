@@ -14,11 +14,11 @@ from patch import webdriver_executable
 from sys import platform
 
 
-def worker_thread(search_key):
+def worker_thread(search_key, directory_name):
     start_time = time.time()
 
     image_scraper = GoogleImageScraper(
-        webdriver_path, image_path, search_key, number_of_images, headless, min_resolution, max_resolution, max_missed)
+        webdriver_path, image_path, search_key, directory_name, number_of_images, headless, min_resolution, max_resolution, max_missed)
     image_urls = image_scraper.find_image_urls()
     image_scraper.save_images(image_urls, keep_filenames, 224, 224)
 
@@ -41,16 +41,27 @@ if __name__ == "__main__":
     #Add new search key into array ["cat","t-shirt","apple","orange","pear","fish"]
     
     # Read attractions.txt and add to set
-    lines = []
+    keys = []
+    values = []
     count = 0
-    with open("../places.txt", "r", encoding="utf-8") as file:
+    path = "../places.txt"
+    eng = []
+    with open(path, "r", encoding="utf-8") as file:
         for line in file:
-            lines.append(line.strip().lower())
 
-    search_keys = lines[:10]
+            # 0 is English name, 1 is Thai name
+            eng = line.split("==")[0]
+            thai = line.split("==")[1]
+            values.append(eng.strip().lower())
+            keys.append(thai.strip())
+
+
+    search_keys = keys
+    directory_name = values
+
 
     #Parameters
-    number_of_images = 5                # Desired number of images
+    number_of_images = 1                # Desired number of images
     headless = True                     # True = No Chrome GUI
     min_resolution = (0, 0)             # Minimum desired image resolution
     max_resolution = (1920, 1080)       # Maximum desired image resolution
@@ -62,4 +73,4 @@ if __name__ == "__main__":
     #Automatically waits for all threads to finish
     #Removes duplicate strings from search_keys
     with concurrent.futures.ThreadPoolExecutor(max_workers=number_of_workers) as executor:
-        executor.map(worker_thread, search_keys)
+        executor.map(worker_thread, search_keys, directory_name)

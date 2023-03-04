@@ -25,10 +25,14 @@ from PIL import Image
 import patch
 
 class GoogleImageScraper():
-    def __init__(self, webdriver_path, image_path, search_key="cat", number_of_images=1, headless=True, min_resolution=(0, 0), max_resolution=(1920, 1080), max_missed=10):
+    def __init__(self, webdriver_path, image_path, search_key, directory_name, number_of_images=1, headless=True, min_resolution=(0, 0), max_resolution=(1920, 1080), max_missed=10):
         #check parameter types
-        search_key_path = search_key.replace(' ', '_')
-        image_path = os.path.join(image_path, search_key_path)
+        path = search_key.replace(' ', '_')
+
+        if(directory_name):
+            path = directory_name.replace(' ', '_')
+
+        image_path = os.path.join(image_path, path)
         if (type(number_of_images)!=int):
             print("[Error] Number of images must be integer value.")
             return
@@ -61,6 +65,7 @@ class GoogleImageScraper():
 
         self.driver = driver
         self.search_key = search_key
+        self.directory_name = directory_name
         self.number_of_images = number_of_images
         self.webdriver_path = webdriver_path
         self.image_path = image_path
@@ -145,8 +150,11 @@ class GoogleImageScraper():
         print("[INFO] Saving image, please wait...")
         for indx,image_url in enumerate(image_urls):
             try:
-                print("[INFO] Image url:%s"%(image_url))
-                search_string = ''.join(e for e in self.search_key if e.isalnum())
+                print("[INFO] Im:ge url:%s"%(image_url))
+                if(self.directory_name):
+                    save_name = ''.join(e for e in self.directory_name if e.isalnum())
+                else:
+                    save_name = ''.join(e for e in self.search_key if e.isalnum())
                 image = requests.get(image_url,timeout=5)
                 if image.status_code == 200:
                     with Image.open(io.BytesIO(image.content)) as image_from_web:
@@ -159,7 +167,7 @@ class GoogleImageScraper():
                                 #join filename and extension
                                 filename = "%s.%s"%(name,image_from_web.format.lower())
                             else:
-                                filename = "%s%s.%s"%(search_string, "_" + str(indx),image_from_web.format.lower())
+                                filename = "%s%s.%s"%(save_name, "_" + str(indx),image_from_web.format.lower())
 
                             image_path = os.path.join(self.image_path, filename)
                             print(

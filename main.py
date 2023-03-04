@@ -34,6 +34,10 @@ def worker_thread(search_key, directory_name):
         os.system("afplay /System/Library/Sounds/Glass.aiff")
 
 if __name__ == "__main__":
+
+    #timer
+    start_time = time.time()
+
     #Define file path
     webdriver_path = os.path.normpath(os.path.join(os.getcwd(), 'webdriver', webdriver_executable()))
     image_path = os.path.normpath(os.path.join(os.getcwd(), 'photos'))
@@ -74,3 +78,12 @@ if __name__ == "__main__":
     #Removes duplicate strings from search_keys
     with concurrent.futures.ThreadPoolExecutor(max_workers=number_of_workers) as executor:
         executor.map(worker_thread, search_keys, directory_name)
+
+
+    end_time = time.time()
+
+    elapsed_time = end_time - start_time
+    print(f"Elapsed time: {elapsed_time:.2f} seconds")  
+
+    if(platform == 'darwin'):
+        os.system("afplay /System/Library/Sounds/Glass.aiff")

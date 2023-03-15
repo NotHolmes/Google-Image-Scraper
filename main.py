@@ -15,17 +15,11 @@ from sys import platform
 
 
 def worker_thread(search_key, directory_name):
-    start_time = time.time()
 
     image_scraper = GoogleImageScraper(
         webdriver_path, image_path, search_key, directory_name, number_of_images, headless, min_resolution, max_resolution, max_missed)
     image_urls = image_scraper.find_image_urls()
     image_scraper.save_images(image_urls, keep_filenames, 224, 224)
-
-    end_time = time.time()
-
-    elapsed_time = end_time - start_time
-    print(f"Elapsed time: {elapsed_time:.2f} seconds")  
 
     #Release resources
     del image_scraper
@@ -47,25 +41,29 @@ if __name__ == "__main__":
     # Read attractions.txt and add to set
     keys = []
     values = []
-    count = 0
-    path = "../places.txt"
+    PATH = "places.txt"
     eng = []
-    with open(path, "r", encoding="utf-8") as file:
+    custom_directory_name = False
+    with open(PATH, "r", encoding="utf-8") as file:
         for line in file:
 
             # 0 is English name, 1 is Thai name
-            eng = line.split("==")[0]
-            thai = line.split("==")[1]
-            values.append(eng.strip().lower())
-            keys.append(thai.strip())
-
+            if(custom_directory_name):
+                eng = line.split("==")[0]
+                thai = line.split("==")[1]
+                values.append(eng.strip().lower())
+                keys.append(thai.strip())
+            else:
+                keys.append(line.strip())
 
     search_keys = keys
-    directory_name = values
-
+    if(custom_directory_name):
+        directory_name = values
+    else:
+        directory_name = search_keys
 
     #Parameters
-    number_of_images = 1                # Desired number of images
+    number_of_images = 5                # Desired number of images
     headless = True                     # True = No Chrome GUI
     min_resolution = (0, 0)             # Minimum desired image resolution
     max_resolution = (1920, 1080)       # Maximum desired image resolution
@@ -84,6 +82,3 @@ if __name__ == "__main__":
 
     elapsed_time = end_time - start_time
     print(f"Elapsed time: {elapsed_time:.2f} seconds")  
-
-    if(platform == 'darwin'):
-        os.system("afplay /System/Library/Sounds/Glass.aiff")
